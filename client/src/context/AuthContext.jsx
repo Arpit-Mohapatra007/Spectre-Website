@@ -14,12 +14,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     let isRefreshing = false;
     let lastActivity = Date.now();
-    let tokenExpiry = localStorage.getItem('tokenExpiry') ? parseInt(localStorage.getItem('tokenExpiry'), 10) : 0;
+    let tokenExpiry = localStorage.getItem('tokenExpiry') ? parseInt(localStorage.getItem('tokenExpiry'), 10) : null;
 
     const activityHandler = () => {
       lastActivity = Date.now();
       // If active again but token expired, try to refresh immediately
-      if (Date.now() > tokenExpiry - 60000 && !isRefreshing) {
+      if (tokenExpiry && Date.now() > tokenExpiry - 60000 && !isRefreshing) {
         doSilentRefresh();
       }
     };
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
 
     const initializeAuth = async () => {
       const token = localStorage.getItem('token');
-      if (!token || Date.now() > tokenExpiry - 60000) {
+      if (!token || (tokenExpiry && Date.now() > tokenExpiry - 60000)) {
         // No token or expired, try to refresh via cookie
         await doSilentRefresh();
       } else {
